@@ -1,0 +1,158 @@
+---
+import Layout from "@layouts/Layout.astro";
+import { supabase } from "@lib/supabase";
+
+const { data: appliances } = await supabase.from("appliance").select();
+const { data: locations } = await supabase.from("location").select();
+const { data: energySources } = await supabase.from("energy_source").select();
+---
+
+<Layout title="REMS">
+	<main class="container mx-auto px-4 h-screen prose flex items-center">
+		<div class="text-center">
+			<h1>Residential Energy Monitoring System</h1>
+
+			<form id="form" class="flex flex-col gap-8" action="/search">
+				<div class="flex gap-2 justify-center items-center">
+					<div class="form-control">
+						<label for="neo4j" class="label cursor-pointer">
+							<span class="label-text pe-2">Neo4j</span>
+							<input
+								type="radio"
+								id="neo4j"
+								name="database"
+								value="Neo4j"
+								class="radio checked:bg-accent"
+								checked
+							/>
+						</label>
+					</div>
+					<div class="form-control">
+						<label for="postgresql" class="label cursor-pointer">
+							<span class="label-text pe-2">PostgreSQL</span>
+							<input
+								type="radio"
+								id="postgresql"
+								name="database"
+								value="PostgreSQL"
+								class="radio checked:bg-accent"
+							/>
+						</label>
+					</div>
+				</div>
+				<div
+					class="flex gap-2"
+					x-data="remsForm"
+					x-effect="togglePlaceholder()"
+				>
+					<label
+						for="search"
+						class="input input-bordered flex items-center gap-2 w-full"
+					>
+						<input
+							id="search"
+							name="search"
+							type="text"
+							class="grow"
+							:placeholder="placeholder"
+							list="options"
+							required
+						/>
+
+						<template x-if="filter === 'Appliance'">
+							<datalist id="options">
+								{
+									appliances &&
+										appliances.map((appliance) => (
+											<option value={appliance.name} />
+										))
+								}
+							</datalist>
+						</template>
+						<template x-if="filter === 'Location'">
+							<datalist id="options">
+								{
+									locations &&
+										locations.map((location) => (
+											<option value={location.name} />
+										))
+								}
+							</datalist>
+						</template>
+						<template x-if="filter === 'EnergySource'">
+							<datalist id="options">
+								{
+									energySources &&
+										energySources.map((energySource) => (
+											<option value={energySource.name} />
+										))
+								}
+							</datalist>
+						</template>
+
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 16 16"
+							fill="currentColor"
+							class="w-4 h-4 opacity-70"
+							><path
+								fill-rule="evenodd"
+								d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+								clip-rule="evenodd"></path></svg
+						>
+					</label>
+					<select
+						name="filter"
+						class="select select-bordered"
+						x-model="filter"
+					>
+						<option selected>Household</option>
+						<option>Appliance</option>
+						<option>Location</option>
+						<option value="EnergySource">Energy Source</option>
+					</select>
+				</div>
+				<button type="submit" class="btn btn-primary">Submit</button>
+			</form>
+		</div>
+	</main>
+</Layout>
+
+<script>
+	import Alpine from "alpinejs";
+
+	document.addEventListener("alpine:init", () => {
+		Alpine.data("remsForm", () => ({
+			filter: "Household",
+			placeholder: "Search #10000 - #10500",
+			togglePlaceholder() {
+				switch (this.filter) {
+					case "Household":
+						this.placeholder = "Search #10000 - #10500";
+						break;
+					case "Appliance":
+						this.placeholder = "Search appliances...";
+						break;
+					case "Location":
+						this.placeholder = "Search locations...";
+						break;
+					case "EnergySource":
+						this.placeholder = "Search energy sources...";
+						break;
+				}
+			},
+		}));
+	});
+
+	// import { actions } from "astro:actions";
+	// const form = document.getElementById("form") as HTMLFormElement;
+
+	// form.addEventListener("submit", async (e) => {
+	// 	e.preventDefault();
+	// 	const formData = new FormData(e.target as HTMLFormElement);
+	// 	// console.log(Object.fromEntries(formData));
+	// 	const result = await actions.searchDatabase(formData);
+	// 	console.log(result);
+	// 	return Astro.redirect("/login");
+	// });
+</script>

@@ -1,0 +1,129 @@
+---
+import Layout from "@layouts/Layout.astro";
+import { driver } from "@lib/neo4j";
+import { startCase } from "lodash-es";
+import Neo4jResults from "@components/Neo4jResults.astro";
+import SupabaseResults from "@components/SupabaseResults.astro";
+import { supabaseQueries } from "@utils/supabaseQueries";
+import { getNeo4jExecTime } from "@utils/getExecTime";
+
+const database = Astro.url.searchParams.get("database") || "";
+const search = Astro.url.searchParams.get("search") || "";
+const filter = Astro.url.searchParams.get("filter") || "";
+
+let resultNeo4j = null;
+let resultSupabase = null;
+
+if (database === "Neo4j") {
+	const property = filter === "Household" ? "id" : "name";
+
+	try {
+		// const cypher = `MATCH (n:${filter} {${property}: $search}) RETURN n`;
+		// const cypher = `MATCH (n:${filter} {${property}: $search})--(connected) RETURN n, connected`;
+
+		const { records, summary } = await driver.executeQuery(
+			`PROFILE CYPHER runtime = pipelined MATCH (:${filter} {${property}: $search})--(n) RETURN labels(n) AS label, n.name AS name, n.id AS id`,
+			{ search },
+			{ database: "neo4j" }
+		);
+
+		// const { records, summary } = await driver.executeQuery(
+		// 	`PROFILE MATCH (:${filter} {${property}: $search})--(n) RETURN n`,
+		// 	{ search },
+		// 	{ database: "neo4j" }
+		// );
+
+		resultNeo4j = records.length > 0 && { records, summary };
+	} catch (err) {
+		console.log(`Error in query\n${err}`);
+	}
+} else {
+	resultSupabase = await supabaseQueries(filter, search);
+}
+
+// resultNeo4j &&
+// 	console.log(resultNeo4j.summary.profile.arguments["string-representation"]);
+// resultNeo4j &&
+// 	console.log(
+// 		getNeo4jExecTime(
+// 			resultNeo4j.summary.profile.arguments["string-representation"]
+// 		)
+// 	);
+
+// resultSupabase && console.log(resultSupabase);
+---
+
+<Layout title="REMS">
+	<nav class="navbar bg-base-100">
+		<div class="navbar-start"></div>
+		<div class="navbar-center">
+			<a href="/" class="btn btn-ghost text-xl">
+				Residential Energy Monitoring System
+			</a>
+		</div>
+		<div class="navbar-end"></div>
+	</nav>
+
+	<main class="container mx-auto p-8 prose">
+		<div class="flex flex-col md:flex-row justify-between pb-8 gap-4">
+			<div>
+				<h1>{startCase(filter)}:</h1>
+				<p class="text-xl">{search}</p>
+			</div>
+
+			<div class="stats bg-primary text-primary-content">
+				<div class="stat">
+					<div class="stat-figure text-secondary">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							class="size-6"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+							></path>
+						</svg>
+					</div>
+					<div class="stat-title">Query Time</div>
+					<div class="stat-value">
+						in
+						{
+							resultNeo4j &&
+								getNeo4jExecTime(
+									resultNeo4j.summary.profile.arguments[
+										"string-representation"
+									]
+								)
+						}
+						{resultSupabase && resultSupabase.execTime.toFixed(3)}
+						ms
+					</div>
+					<div class="stat-desc">Using {database}</div>
+				</div>
+			</div>
+		</div>
+
+		{!resultNeo4j && !resultSupabase && <p>No record found...</p>}
+		{
+			resultNeo4j && resultNeo4j.records.length > 0 && (
+				<Neo4jResults records={resultNeo4j.records} />
+			)
+		}
+		{
+			resultSupabase && (
+				<SupabaseResults
+					filter={filter}
+					households={resultSupabase.households}
+					appliances={resultSupabase.appliances}
+					locations={resultSupabase.locations}
+					energySources={resultSupabase.energySources}
+				/>
+			)
+		}
+	</main>
+</Layout>

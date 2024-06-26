@@ -1,0 +1,98 @@
+---
+const { records } = Astro.props;
+
+const households = records.filter(
+	(record: { get: (arg0: string) => string }) =>
+		record.get("label") == "Household"
+);
+const appliances = records.filter(
+	(record: { get: (arg0: string) => string }) =>
+		record.get("label") == "Appliance"
+);
+const locations = records.filter(
+	(record: { get: (arg0: string) => string }) =>
+		record.get("label") == "Location"
+);
+const energySources = records.filter(
+	(record: { get: (arg0: string) => string }) =>
+		record.get("label") == "EnergySource"
+);
+---
+
+<div class="flex flex-col gap-2">
+	{
+		households.length > 0 && (
+			<div class="collapse collapse-arrow bg-base-200">
+				<input type="checkbox" />
+				<div class="collapse-title text-xl font-medium">Households</div>
+				<div class="collapse-content">
+					<ul class="grid grid-cols-4 gap-4">
+						{households.map(
+							(household: { get: (arg0: string) => unknown }) => (
+								<li>{household.get("id")}</li>
+							)
+						)}
+					</ul>
+				</div>
+			</div>
+		)
+	}
+
+	{
+		appliances.length > 0 && (
+			<div class="collapse collapse-arrow bg-base-200">
+				<input type="checkbox" />
+				<div class="collapse-title text-xl font-medium">Appliances</div>
+				<div class="collapse-content">
+					<ul class="grid grid-cols-4 gap-4">
+						{appliances.map(
+							(appliance: { get: (arg0: string) => unknown }) => (
+								<li>{appliance.get("name")}</li>
+							)
+						)}
+					</ul>
+				</div>
+			</div>
+		)
+	}
+
+	{
+		locations.length > 0 && (
+			<div class="collapse collapse-arrow bg-base-200">
+				<input type="checkbox" />
+				<div class="collapse-title text-xl font-medium">Locations</div>
+				<div class="collapse-content">
+					<ul class="grid grid-cols-4 gap-4">
+						{locations.map(
+							(location: { get: (arg0: string) => unknown }) => (
+								<li>{location.get("name")}</li>
+							)
+						)}
+					</ul>
+				</div>
+			</div>
+		)
+	}
+
+	{
+		energySources.length > 0 && (
+			<div class="collapse collapse-arrow bg-base-200">
+				<input type="checkbox" />
+				<div class="collapse-title text-xl font-medium">
+					Energy Sources
+				</div>
+				<div class="collapse-content">
+					<ul class="grid grid-cols-4 gap-4">
+						{energySources.map(
+							(energySource: {
+								get: (arg0: string) => unknown;
+							}) => (
+								<li>{energySource.get("name")}</li>
+							)
+						)}
+					</ul>
+				</div>
+			</div>
+		)
+	}
+</div>

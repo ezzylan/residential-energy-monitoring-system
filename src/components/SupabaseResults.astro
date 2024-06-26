@@ -1,0 +1,80 @@
+---
+interface Props {
+	filter: string;
+	households: number[];
+	appliances: string[];
+	locations: string[];
+	energySources: string[];
+}
+
+const { filter, households, appliances, locations, energySources } =
+	Astro.props;
+---
+
+<div class="flex flex-col gap-2">
+	{
+		filter !== "Household" && households.length > 0 && (
+			<div class="collapse collapse-arrow bg-base-200">
+				<input type="checkbox" />
+				<div class="collapse-title text-xl font-medium">Households</div>
+				<div class="collapse-content">
+					<ul class="grid grid-cols-4 gap-4">
+						{households.map((household) => (
+							<li>{household}</li>
+						))}
+					</ul>
+				</div>
+			</div>
+		)
+	}
+
+	{
+		filter !== "Appliance" && appliances.length > 0 && (
+			<div class="collapse collapse-arrow bg-base-200">
+				<input type="checkbox" />
+				<div class="collapse-title text-xl font-medium">Appliances</div>
+				<div class="collapse-content">
+					<ul class="grid grid-cols-4 gap-4">
+						{appliances.map((appliance) => (
+							<li>{appliance}</li>
+						))}
+					</ul>
+				</div>
+			</div>
+		)
+	}
+
+	{
+		filter !== "Location" && locations.length > 0 && (
+			<div class="collapse collapse-arrow bg-base-200">
+				<input type="checkbox" />
+				<div class="collapse-title text-xl font-medium">Locations</div>
+				<div class="collapse-content">
+					<ul class="grid grid-cols-4 gap-4">
+						{locations.map((location) => (
+							<li>{location}</li>
+						))}
+					</ul>
+				</div>
+			</div>
+		)
+	}
+
+	{
+		filter !== "EnergySource" && energySources.length > 0 && (
+			<div class="collapse collapse-arrow bg-base-200">
+				<input type="checkbox" />
+				<div class="collapse-title text-xl font-medium">
+					Energy Sources
+				</div>
+				<div class="collapse-content">
+					<ul class="grid grid-cols-4 gap-4">
+						{energySources.map((energySource) => (
+							<li>{energySource}</li>
+						))}
+					</ul>
+				</div>
+			</div>
+		)
+	}
+</div>
