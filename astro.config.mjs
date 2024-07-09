@@ -9,7 +9,4 @@ export default defineConfig({
   integrations: [tailwind(), alpinejs()],
   output: "server",
   adapter: vercel(),
-  experimental: {
-    actions: true
-  }
 });

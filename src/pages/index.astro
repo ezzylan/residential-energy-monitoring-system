@@ -109,7 +109,7 @@ const { data: energySources } = await supabase.from("energy_source").select();
 						<option selected>Household</option>
 						<option>Appliance</option>
 						<option>Location</option>
-						<option value="EnergySource">Energy Source</option>
+						<option value="EnergySource">Energy</option>
 					</select>
 				</div>
 				<button type="submit" class="btn btn-primary">Submit</button>
@@ -124,11 +124,11 @@ const { data: energySources } = await supabase.from("energy_source").select();
 	document.addEventListener("alpine:init", () => {
 		Alpine.data("remsForm", () => ({
 			filter: "Household",
-			placeholder: "Search #10000 - #10500",
+			placeholder: "Search #10001 - #10500",
 			togglePlaceholder() {
 				switch (this.filter) {
 					case "Household":
-						this.placeholder = "Search #10000 - #10500";
+						this.placeholder = "Search #10001 - #10500";
 						break;
 					case "Appliance":
 						this.placeholder = "Search appliances...";
@@ -137,22 +137,10 @@ const { data: energySources } = await supabase.from("energy_source").select();
 						this.placeholder = "Search locations...";
 						break;
 					case "EnergySource":
-						this.placeholder = "Search energy sources...";
+						this.placeholder = "Search energies...";
 						break;
 				}
 			},
 		}));
 	});
-
-	// import { actions } from "astro:actions";
-	// const form = document.getElementById("form") as HTMLFormElement;
-
-	// form.addEventListener("submit", async (e) => {
-	// 	e.preventDefault();
-	// 	const formData = new FormData(e.target as HTMLFormElement);
-	// 	// console.log(Object.fromEntries(formData));
-	// 	const result = await actions.searchDatabase(formData);
-	// 	console.log(result);
-	// 	return Astro.redirect("/login");
-	// });
 </script>
