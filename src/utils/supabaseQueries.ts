@@ -1,10 +1,8 @@
 import { supabase } from "@lib/supabase";
-import { snakeCase } from "lodash-es";
 import { getSBExecTime } from "@utils/getExecTime";
+import { snakeCase } from "lodash-es";
 
 export async function supabaseQueries(filter: string, search: string) {
-  // const table =
-  //   filter === "Household" ? "household_appliance" : "household_location";
   const property = filter === "Household" ? "DOEID" : "name";
   let households: number[] = [];
   let appliances: string[] = [];
@@ -13,11 +11,13 @@ export async function supabaseQueries(filter: string, search: string) {
 
   let execTime = 0;
 
+  // query 1: get searched data from table
   const { data: tableData, error: tableError } = await supabase
     .from(snakeCase(filter))
     .select()
     .eq(property, search);
 
+  // get execution time for query 1
   const { data: queryData1 } = await supabase
     .from(snakeCase(filter))
     .select()
@@ -42,11 +42,13 @@ export async function supabaseQueries(filter: string, search: string) {
             ? "locationId"
             : "energySourceId";
 
+    // query 2: get data from household_appliance table
     const { data } = await supabase
       .from("household_appliance")
       .select()
       .eq(column, id);
 
+    // get execution time for query 2
     const { data: queryData2 } = await supabase
       .from("household_appliance")
       .select()
@@ -56,17 +58,6 @@ export async function supabaseQueries(filter: string, search: string) {
     if (typeof queryData2 === "string") {
       execTime += getSBExecTime(queryData2);
     }
-
-    // const { data: applianceData } = await supabase
-    //         .from("appliance")
-    //         .select("name")
-    //   .eq("id", data[0].applianceId);
-
-    //   applianceData &&
-    //     applianceData.map((appliance) => appliances.push(appliance.name));
-    //     appliances = [...new Set(appliances)];
-
-    // console.log(appliances)
 
     await Promise.all(
       data.map(
@@ -79,11 +70,13 @@ export async function supabaseQueries(filter: string, search: string) {
           item.householdId && households.push(item.householdId);
 
           if (item.applianceId) {
+            // query 3: get data from appliance table
             const { data: appliancesData } = await supabase
               .from("appliance")
               .select("name")
               .eq("id", item.applianceId);
 
+            // get execution time for query 3
             const { data: queryData3 } = await supabase
               .from("appliance")
               .select("name")
@@ -101,11 +94,13 @@ export async function supabaseQueries(filter: string, search: string) {
           }
 
           if (item.locationId) {
+            // query 4: get data from location table
             const { data: locationsData } = await supabase
               .from("location")
               .select("name")
               .eq("id", item.locationId);
 
+            // get execution time for query 4
             const { data: queryData4 } = await supabase
               .from("location")
               .select("name")
@@ -121,11 +116,13 @@ export async function supabaseQueries(filter: string, search: string) {
           }
 
           if (item.energySourceId) {
+            // query 5: get data from energy_source table
             const { data: energySourcesData } = await supabase
               .from("energy_source")
               .select("name")
               .eq("id", item.energySourceId);
 
+            // get execution time for query 5
             const { data: queryData5 } = await supabase
               .from("energy_source")
               .select("name")
@@ -145,19 +142,10 @@ export async function supabaseQueries(filter: string, search: string) {
       ),
     );
 
-    // resultSupabase =
-    // 	error || data.length === 0
-    // 		? error
-    // 			? error.message
-    // 			: "No records found"
-    // 		: { data, queryData };
-
     households = [...new Set(households)];
     appliances = [...new Set(appliances)];
     locations = [...new Set(locations)];
     energySources = [...new Set(energySources)];
-
-    // console.log(arrays);
 
     return { households, appliances, locations, energySources, execTime };
   }

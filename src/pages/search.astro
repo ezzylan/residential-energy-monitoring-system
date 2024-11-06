@@ -18,20 +18,11 @@ if (database === "Neo4j") {
 	const property = filter === "Household" ? "id" : "name";
 
 	try {
-		// const cypher = `MATCH (n:${filter} {${property}: $search}) RETURN n`;
-		// const cypher = `MATCH (n:${filter} {${property}: $search})--(connected) RETURN n, connected`;
-
 		const { records, summary } = await driver.executeQuery(
 			`PROFILE CYPHER runtime = pipelined MATCH (:${filter} {${property}: $search})--(n) RETURN labels(n) AS label, n.name AS name, n.id AS id`,
 			{ search },
 			{ database: "neo4j" }
 		);
-
-		// const { records, summary } = await driver.executeQuery(
-		// 	`PROFILE MATCH (:${filter} {${property}: $search})--(n) RETURN n`,
-		// 	{ search },
-		// 	{ database: "neo4j" }
-		// );
 
 		resultNeo4j = records.length > 0 && { records, summary };
 	} catch (err) {
